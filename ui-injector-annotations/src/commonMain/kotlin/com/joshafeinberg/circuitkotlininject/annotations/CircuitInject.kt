@@ -1,4 +1,4 @@
-package com.joshafeinberg.circuitkotlininject.processors.annotations
+package com.joshafeinberg.circuitkotlininject.annotations
 
 import com.slack.circuit.runtime.CircuitUiState
 import com.slack.circuit.runtime.screen.Screen
