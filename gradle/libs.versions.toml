@@ -1,0 +1,30 @@
+[versions]
+app-cash-sqldelight = "2.0.0"
+circuit = "0.17.0"
+io-ktor = "2.3.6"
+kotlinInject = "0.6.3"
+kotlinpoet = "1.15.2"
+
+plugin-android-gradle = "8.1.4"
+plugin-kotlin = "1.9.21"
+plugin-ksp = "1.9.21-1.0.15"
+plugin-ktlint = "11.3.2"
+plugin-mavenpublish = "0.21.0"
+
+[libraries]
+circuit-foundation = { module = "com.slack.circuit:circuit-foundation", version.ref = "circuit" }
+kotlin-inject-compiler-ksp = { module = "me.tatarka.inject:kotlin-inject-compiler-ksp", version.ref = "kotlinInject" }
+kotlin-inject-runtime = { module = "me.tatarka.inject:kotlin-inject-runtime", version.ref = "kotlinInject" }
+kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
+kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinpoet" }
+ksp-processor = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "plugin-ksp" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "plugin-android-gradle" }
+android-library = { id = "com.android.library", version.ref = "plugin-android-gradle" }
+jetbrains-compose = { id = "org.jetbrains.compose", version = "1.5.11" }
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "plugin-kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "plugin-kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "plugin-ksp" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "plugin-ktlint" }
+mavenpublish = { id = "com.vanniktech.maven.publish", version.ref = "plugin-mavenpublish" }
