@@ -15,7 +15,7 @@ import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSValueParameter
 import com.google.devtools.ksp.validate
-import com.joshafeinberg.feinbergos.annotations.CircuitInject
+import com.joshafeinberg.circuitkotlininject.processors.annotations.CircuitInject
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
