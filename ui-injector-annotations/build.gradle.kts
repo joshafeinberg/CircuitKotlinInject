@@ -7,14 +7,14 @@ kotlin {
     jvm {
         jvmToolchain(17)
     }
-    /*js(IR) {
+    js(IR) {
         browser()
-    }*/
+    }
     sourceSets {
         commonMain {
             dependencies {
                 compileOnly(libs.circuit.foundation)
-                api(libs.circuit.codegen.annotations)
+                // api(libs.circuit.codegen.annotations)
             }
         }
     }

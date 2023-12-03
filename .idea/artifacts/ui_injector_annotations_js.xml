@@ -1,8 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="ui-injector-annotations-js">
     <output-path>$PROJECT_DIR$/ui-injector-annotations/build/libs</output-path>
-    <root id="archive" name="ui-injector-annotations-js.jar">
-      <element id="module-output" name="CircuitKotlinInject.ui-injector-annotations.jsMain" />
-    </root>
+    <root id="archive" name="ui-injector-annotations-js.jar" />
   </artifact>
 </component>

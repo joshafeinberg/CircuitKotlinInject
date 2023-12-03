@@ -6,15 +6,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import com.joshafeinberg.circuitkotlininject.annotations.CircuitInject
-import com.slack.circuit.foundation.Circuit
 import com.slack.circuit.foundation.CircuitCompositionLocals
 import com.slack.circuit.foundation.CircuitContent
 import com.slack.circuit.runtime.CircuitUiState
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
-import com.slack.circuit.runtime.ui.Ui
-import me.tatarka.inject.annotations.*
+import me.tatarka.inject.annotations.Component
+import me.tatarka.inject.annotations.Provides
+import me.tatarka.inject.annotations.Scope
 
 fun main() = application {
     val parentComponent = remember { ParentComponent::class.create() }

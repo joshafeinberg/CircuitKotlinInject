@@ -15,7 +15,7 @@ import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSValueParameter
 import com.google.devtools.ksp.validate
-import com.joshafeinberg.circuitkotlininject.annotations.CircuitInject
+import com.joshafeinberg.circuitkotlininject.annotations.CircuitInjectOld
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
@@ -71,10 +71,10 @@ class UiInjectorProcessor(
         }
 
         val symbols = resolver
-            .getSymbolsWithAnnotation(CircuitInject::class.qualifiedName!!)
+            .getSymbolsWithAnnotation(CircuitInjectOld::class.qualifiedName!!)
             .filter(KSNode::validate)
             .map { ksAnnotated ->
-                val circuitInject = ksAnnotated.annotations.firstOrNull { it.shortName.asString() == CircuitInject::class.simpleName }
+                val circuitInject = ksAnnotated.annotations.firstOrNull { it.shortName.asString() == CircuitInjectOld::class.simpleName }
                 val screen = circuitInject.getScreenQualifiedRoute()
 
                 when (ksAnnotated) {
