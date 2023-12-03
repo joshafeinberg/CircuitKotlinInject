@@ -14,6 +14,7 @@ kotlin {
         commonMain {
             dependencies {
                 compileOnly(libs.circuit.foundation)
+                // api(libs.circuit.codegen.annotations)
             }
         }
     }
