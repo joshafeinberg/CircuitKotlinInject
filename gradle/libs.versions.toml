@@ -1,6 +1,8 @@
 [versions]
+anvil = "2.4.8"
 app-cash-sqldelight = "2.0.0"
 circuit = "0.17.0"
+dagger = "2.49"
 io-ktor = "2.3.6"
 kotlinInject = "0.6.3"
 kotlinpoet = "1.15.2"
@@ -12,7 +14,12 @@ plugin-ktlint = "11.3.2"
 plugin-mavenpublish = "0.21.0"
 
 [libraries]
+anvil-annotations = { module = "com.squareup.anvil:annotations", version.ref = "anvil" }
+autoService-annotations = { module = "com.google.auto.service:auto-service-annotations", version = "1.1.1" }
+autoService-ksp = { module = "dev.zacsweers.autoservice:auto-service-ksp", version = "1.1.0" }
+circuit-codegen-annotations = { module = "com.slack.circuit:circuit-codegen-annotations", version.ref = "circuit" }
 circuit-foundation = { module = "com.slack.circuit:circuit-foundation", version.ref = "circuit" }
+dagger = { module = "com.google.dagger:dagger", version.ref = "dagger" }
 kotlin-inject-compiler-ksp = { module = "me.tatarka.inject:kotlin-inject-compiler-ksp", version.ref = "kotlinInject" }
 kotlin-inject-runtime = { module = "me.tatarka.inject:kotlin-inject-runtime", version.ref = "kotlinInject" }
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }

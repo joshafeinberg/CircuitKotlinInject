@@ -60,6 +60,7 @@ class UiInjectorProcessor(
     private val codeGenerator: CodeGenerator,
 ) : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
+        val circuitSymbols = CircuitSymbols.create(resolver) ?: return emptyList()
         val componentPackage = options[CIRCUIT_COMPONENT_PACKAGE]
         if (componentPackage == null) {
             logger.error("Should set component's package")
@@ -75,7 +76,6 @@ class UiInjectorProcessor(
             .map { ksAnnotated ->
                 val circuitInject = ksAnnotated.annotations.firstOrNull { it.shortName.asString() == CircuitInject::class.simpleName }
                 val screen = circuitInject.getScreenQualifiedRoute()
-                val state = circuitInject.getStateQualifiedRoute()
 
                 when (ksAnnotated) {
                     is KSFunctionDeclaration -> NeededInjector(
@@ -83,7 +83,7 @@ class UiInjectorProcessor(
                         ksAnnotated.simpleName.getShortName(),
                         ksAnnotated.packageName.asString(),
                         screen,
-                        state,
+                        ksAnnotated.parameters.firstOrNull { circuitSymbols.circuitUiState.isAssignableFrom(it.type.resolve()) }?.type?.resolve(),
                         null,
                     )
                     is KSClassDeclaration -> NeededInjector(
@@ -91,7 +91,7 @@ class UiInjectorProcessor(
                         ksAnnotated.simpleName.getShortName(),
                         ksAnnotated.packageName.asString(),
                         screen,
-                        state,
+                        null,
                         ksAnnotated.primaryConstructor?.parameters,
                     )
                     else -> {
@@ -120,13 +120,6 @@ class UiInjectorProcessor(
             error("Screen is not provided")
         }
         return this.arguments.firstOrNull { it.name?.asString() == "screen" }?.value as? KSType
-    }
-
-    private fun KSAnnotation?.getStateQualifiedRoute(): KSType? {
-        if (this == null) {
-            error("State is not provided")
-        }
-        return this.arguments.firstOrNull { it.name?.asString() == "state" }?.value as? KSType
     }
 
     /**
@@ -335,4 +328,30 @@ class UiInjectorProcessor(
     ) {
         val isPresenter: Boolean = name.endsWith("Presenter")
     }
+}
+
+private class CircuitSymbols private constructor(resolver: Resolver) {
+    val modifier = resolver.loadKSType(MODIFIER.canonicalName)
+    val circuitUiState = resolver.loadKSType(CIRCUIT_UI_STATE.canonicalName)
+    val screen = resolver.loadKSType(SCREEN.canonicalName)
+    val navigator = resolver.loadKSType(NAVIGATOR.canonicalName)
+
+    companion object {
+        fun create(resolver: Resolver): CircuitSymbols? {
+            @Suppress("SwallowedException")
+            return try {
+                CircuitSymbols(resolver)
+            } catch (e: IllegalStateException) {
+                null
+            }
+        }
+    }
+}
+
+private fun Resolver.loadKSType(name: String): KSType =
+    loadOptionalKSType(name) ?: error("Could not find $name in classpath")
+
+private fun Resolver.loadOptionalKSType(name: String?): KSType? {
+    if (name == null) return null
+    return getClassDeclarationByName(getKSNameFromString(name))?.asType(emptyList())
 }

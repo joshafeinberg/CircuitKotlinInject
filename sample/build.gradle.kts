@@ -22,4 +22,5 @@ dependencies {
 ksp {
     arg("circuit.codegen.package", "com.joshafeinberg.circuitkotlininject.sample")
     arg("circuit.codegen.parent.component", "com.joshafeinberg.circuitkotlininject.sample.ParentComponent")
+    arg("circuit.codegen.mode", "kotlin_inject")
 }

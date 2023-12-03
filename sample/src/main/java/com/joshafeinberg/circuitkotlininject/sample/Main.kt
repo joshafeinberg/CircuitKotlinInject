@@ -6,14 +6,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import com.joshafeinberg.circuitkotlininject.processors.annotations.CircuitInject
+import com.joshafeinberg.circuitkotlininject.annotations.CircuitInject
+import com.slack.circuit.foundation.Circuit
 import com.slack.circuit.foundation.CircuitCompositionLocals
 import com.slack.circuit.foundation.CircuitContent
 import com.slack.circuit.runtime.CircuitUiState
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
-import me.tatarka.inject.annotations.Component
-import me.tatarka.inject.annotations.Provides
+import com.slack.circuit.runtime.ui.Ui
+import me.tatarka.inject.annotations.*
 
 fun main() = application {
     val parentComponent = remember { ParentComponent::class.create() }
@@ -40,7 +41,10 @@ abstract class ParentComponent {
 
 }
 
-@CircuitInject(MyScreen::class, MyScreen.MyScreenState::class)
+@Scope
+annotation class AppScope
+
+@com.slack.circuit.codegen.annotations.CircuitInject(MyScreen::class, AppScope::class)
 @Composable
 fun MyScreen(state: MyScreen.MyScreenState, modifier: Modifier) {
     Text(state.visibleString)
@@ -54,7 +58,7 @@ data object MyScreen : Screen {
 
 }
 
-@CircuitInject(MyScreen::class, MyScreen.MyScreenState::class)
+@com.slack.circuit.codegen.annotations.CircuitInject(MyScreen::class, AppScope::class)
 class MyScreenPresenter(private val injectedString: String) : Presenter<MyScreen.MyScreenState> {
     @Composable
     override fun present(): MyScreen.MyScreenState {
