@@ -175,7 +175,7 @@ private class CircuitSymbolProcessor(
             }
         val screenKSType = circuitInjectAnnotation.arguments[0].value as KSType
         val screenIsObject =
-            screenKSType.declaration.let { it is KSClassDeclaration && it.classKind == ClassKind.OBJECT }
+            screenKSType.declaration.let { it is KSClassDeclaration && it.classKind == ClassKind.OBJECT && !it.modifiers.contains(Modifier.DATA) }
         val screenType = screenKSType.toTypeName()
         val scope = (circuitInjectAnnotation.arguments[1].value as KSType).toTypeName()
 
@@ -639,7 +639,7 @@ private fun KSFunctionDeclaration.assistedParameters(
         }
     }
         .toList()
-        .map { CodeBlock.of("${it.name} = ${it.factoryName} as ${it.type}") }
+        .map { CodeBlock.of("${it.name} = ${it.factoryName}") }
         .joinToCode(",·")
 }
 
