@@ -32,11 +32,9 @@ private const val DAGGER_MULTIBINDINGS_PACKAGE = "$DAGGER_PACKAGE.multibindings"
 private const val CIRCUIT_RUNTIME_UI_PACKAGE = "$CIRCUIT_RUNTIME_BASE_PACKAGE.ui"
 private const val CIRCUIT_RUNTIME_SCREEN_PACKAGE = "$CIRCUIT_RUNTIME_BASE_PACKAGE.screen"
 private const val CIRCUIT_RUNTIME_PRESENTER_PACKAGE = "$CIRCUIT_RUNTIME_BASE_PACKAGE.presenter"
-private const val KOTLIN_INJECT_BASE_PACKAGE = "me.tatarka.inject.annotations"
 private val MODIFIER = ClassName("androidx.compose.ui", "Modifier")
 private val CIRCUIT_INJECT_ANNOTATION =
     ClassName("com.slack.circuit.codegen.annotations", "CircuitInject")
-private val CIRCUIT = ClassName("com.slack.circuit.foundation", "Circuit")
 private val CIRCUIT_PRESENTER = ClassName(CIRCUIT_RUNTIME_PRESENTER_PACKAGE, "Presenter")
 private val CIRCUIT_PRESENTER_FACTORY = CIRCUIT_PRESENTER.nestedClass("Factory")
 private val CIRCUIT_UI = ClassName(CIRCUIT_RUNTIME_UI_PACKAGE, "Ui")
@@ -51,14 +49,9 @@ private val DAGGER_INSTALL_IN = ClassName(DAGGER_HILT_PACKAGE, "InstallIn")
 private val DAGGER_ORIGINATING_ELEMENT =
     ClassName(DAGGER_HILT_CODEGEN_PACKAGE, "OriginatingElement")
 private val DAGGER_INTO_SET = ClassName(DAGGER_MULTIBINDINGS_PACKAGE, "IntoSet")
-private val KOTLIN_INJECT_COMPONENT = ClassName(KOTLIN_INJECT_BASE_PACKAGE, "Component")
-private val KOTLIN_INJECT_INTO_SET = ClassName(KOTLIN_INJECT_BASE_PACKAGE, "IntoSet")
-private val KOTLIN_INJECT_PROVIDES = ClassName(KOTLIN_INJECT_BASE_PACKAGE, "Provides")
 private const val MODULE = "Module"
 private const val FACTORY = "Factory"
 private const val CIRCUIT_CODEGEN_MODE = "circuit.codegen.mode"
-private const val CIRCUIT_COMPONENT_PACKAGE = "circuit.codegen.package"
-private const val CIRCUIT_PARENT_COMPONENT = "circuit.codegen.parent.component"
 
 @AutoService(SymbolProcessorProvider::class)
 public class CircuitSymbolProcessorProvider : SymbolProcessorProvider {
@@ -104,9 +97,6 @@ private class CircuitSymbolProcessor(
     private val options: Map<String, String>,
     private val platforms: List<PlatformInfo>,
 ) : SymbolProcessor {
-    
-    // todo - this is bad
-    private val bindMethodsToCreate = mutableListOf<KotlinInjectBindingResult>()
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val symbols = CircuitSymbols.create(resolver) ?: return emptyList()
@@ -128,22 +118,14 @@ private class CircuitSymbolProcessor(
             return emptyList()
         }
 
-        val componentPackage = options[CIRCUIT_COMPONENT_PACKAGE]
-        if (componentPackage == null) {
-            logger.error("Should set component's package")
-        }
-
-        val parentComponent = options[CIRCUIT_PARENT_COMPONENT]?.let {
-            ClassName.bestGuess(it.trim())
-        }
-
-        resolver.getSymbolsWithAnnotation(CIRCUIT_INJECT_ANNOTATION.canonicalName).forEach {
-                annotatedElement ->
+        resolver.getSymbolsWithAnnotation(CIRCUIT_INJECT_ANNOTATION.canonicalName).forEach { annotatedElement ->
             when (annotatedElement) {
                 is KSClassDeclaration ->
                     generateFactory(annotatedElement, InstantiationType.CLASS, symbols, codegenMode)
+
                 is KSFunctionDeclaration ->
                     generateFactory(annotatedElement, InstantiationType.FUNCTION, symbols, codegenMode)
+
                 else ->
                     logger.error(
                         "CircuitInject is only applicable on classes and functions.",
@@ -151,13 +133,6 @@ private class CircuitSymbolProcessor(
                     )
             }
         }
-
-        createComponentFile(
-            bindMethodsToCreate,
-            componentPackage,
-            parentComponent?.let { listOf(it) }
-        )
-
 
         return emptyList()
     }
@@ -175,7 +150,11 @@ private class CircuitSymbolProcessor(
             }
         val screenKSType = circuitInjectAnnotation.arguments[0].value as KSType
         val screenIsObject =
-            screenKSType.declaration.let { it is KSClassDeclaration && it.classKind == ClassKind.OBJECT && !it.modifiers.contains(Modifier.DATA) }
+            screenKSType.declaration.let {
+                it is KSClassDeclaration && it.classKind == ClassKind.OBJECT && !it.modifiers.contains(
+                    Modifier.DATA
+                )
+            }
         val screenType = screenKSType.toTypeName()
         val scope = (circuitInjectAnnotation.arguments[1].value as KSType).toTypeName()
 
@@ -220,6 +199,7 @@ private class CircuitSymbolProcessor(
             when (factoryData.factoryType) {
                 FactoryType.PRESENTER ->
                     builder.buildPresenterFactory(annotatedElement, screenBranch, factoryData.codeBlock)
+
                 FactoryType.UI ->
                     builder.buildUiFactory(annotatedElement, screenBranch, factoryData.codeBlock)
             }
@@ -230,15 +210,6 @@ private class CircuitSymbolProcessor(
         val topLevelClass = (topLevelDeclaration as? KSClassDeclaration)?.toClassName()
 
         val originatingFile = listOfNotNull(annotatedElement.containingFile)
-        
-        bindMethodsToCreate.add(
-            KotlinInjectBindingResult(
-                className + FACTORY,
-                factoryData.packageName,
-                factoryData.factoryType,
-                originatingFile
-            )
-        )
 
         FileSpec.get(factoryData.packageName, typeSpec)
             .writeTo(
@@ -305,7 +276,13 @@ private class CircuitSymbolProcessor(
                         FactoryType.UI
                     }
                 val assistedParams =
-                    fd.assistedParameters(symbols, logger, screenKSType, codegenMode, factoryType == FactoryType.PRESENTER)
+                    fd.assistedParameters(
+                        symbols,
+                        logger,
+                        screenKSType,
+                        codegenMode,
+                        factoryType == FactoryType.PRESENTER
+                    )
                 codeBlock =
                     when (factoryType) {
                         FactoryType.PRESENTER ->
@@ -315,6 +292,7 @@ private class CircuitSymbolProcessor(
                                 MemberName(packageName, name),
                                 assistedParams
                             )
+
                         FactoryType.UI -> {
                             // State param is optional
                             val stateParam =
@@ -385,6 +363,7 @@ private class CircuitSymbolProcessor(
                         }
                     }
             }
+
             InstantiationType.CLASS -> {
                 val cd = annotatedElement as KSClassDeclaration
                 cd.checkVisibility(logger) {
@@ -481,98 +460,6 @@ private class CircuitSymbolProcessor(
             }
         }
         return FactoryData(className, packageName, factoryType, constructorParams, codeBlock)
-    }
-
-    private fun createComponentFile(
-        symbols: List<KotlinInjectBindingResult>,
-        componentPackage: String?,
-        parentClasses: List<ClassName>?
-    ) {
-        val bindMethods = symbols.map { bindingResult ->
-            if (bindingResult.factoryType == FactoryType.PRESENTER) {
-                PropertySpec.builder("bind",
-                    CIRCUIT_PRESENTER_FACTORY, KModifier.PROTECTED)
-                    .receiver(ClassName(bindingResult.factoryPackage, bindingResult.factoryName))
-                    .getter(
-                        FunSpec.getterBuilder()
-                            .addAnnotation(KOTLIN_INJECT_PROVIDES)
-                            .addAnnotation(KOTLIN_INJECT_INTO_SET)
-                            .addStatement("return this")
-                            .build(),
-                    )
-                    .build()
-            } else {
-                PropertySpec.builder("bind",
-                    CIRCUIT_UI_FACTORY, KModifier.PROTECTED)
-                    .receiver(ClassName(bindingResult.factoryPackage, bindingResult.factoryName))
-                    .getter(
-                        FunSpec.getterBuilder()
-                            .addAnnotation(KOTLIN_INJECT_PROVIDES)
-                            .addAnnotation(KOTLIN_INJECT_INTO_SET)
-                            .addStatement("return this")
-                            .build(),
-                    )
-                    .build()
-            }
-        }
-
-        val injectableCircuitProperty = PropertySpec.builder("circuit", CIRCUIT, KModifier.ABSTRACT)
-            .build()
-
-        val circuitProvider = FunSpec.builder("providesCircuit")
-            .addAnnotation(KOTLIN_INJECT_PROVIDES)
-            .returns(CIRCUIT)
-            .addParameter("uiFactories", Set::class.asClassName().parameterizedBy(CIRCUIT_UI_FACTORY))
-            .addParameter("presenterFactories", Set::class.asClassName().parameterizedBy(CIRCUIT_PRESENTER_FACTORY))
-            .addStatement("return %T.Builder().addUiFactories(uiFactories).addPresenterFactories(presenterFactories).build()", CIRCUIT)
-            .build()
-
-        val parameters = parentClasses?.map {
-            ParameterSpec.builder(it.simpleName.lowercase(Locale.getDefault()), it)
-                .build()
-        }
-
-        val properties = parentClasses?.map {
-            val name = it.simpleName.lowercase(Locale.getDefault())
-            PropertySpec.builder(name, it)
-                .addAnnotation(KOTLIN_INJECT_COMPONENT)
-                .initializer(name)
-                .build()
-        }
-
-        val classSpec = TypeSpec.classBuilder("CircuitComponent")
-            .addAnnotation(KOTLIN_INJECT_COMPONENT)
-            .addModifiers(KModifier.INTERNAL, KModifier.ABSTRACT)
-            .primaryConstructor(
-                FunSpec.constructorBuilder()
-                    .apply {
-                        parameters?.let {
-                            addParameters(it)
-                        }
-                    }
-                    .build(),
-            )
-            .apply {
-                properties?.let {
-                    addProperties(it)
-                }
-            }
-            .addProperty(injectableCircuitProperty)
-            .addFunction(circuitProvider)
-            .addProperties(bindMethods.toList())
-            .build()
-
-        try {
-            FileSpec.builder(componentPackage ?: "", "CircuitComponent")
-                .addType(classSpec)
-                .build()
-                .writeTo(
-                    codeGenerator,
-                    Dependencies(false, *symbols.flatMap { it.originatingFiles }.toList().toTypedArray())
-                )
-        } catch (e: Exception) {
-            logger.warn("This is bad but I'll figure it out later")
-        }
     }
 }
 
@@ -857,10 +744,3 @@ private fun KSDeclaration.topLevelDeclaration(): KSDeclaration {
 
 private val Visibility.isVisible: Boolean
     get() = this != Visibility.PRIVATE && this != Visibility.LOCAL
-
-private data class KotlinInjectBindingResult(
-    val factoryName: String,
-    val factoryPackage: String,
-    val factoryType: FactoryType,
-    val originatingFiles: List<KSFile>,
-)

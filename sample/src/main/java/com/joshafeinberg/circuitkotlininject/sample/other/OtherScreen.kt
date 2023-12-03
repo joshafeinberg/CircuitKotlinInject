@@ -21,7 +21,7 @@ data object OtherScreen : Screen {
 }
 
 @com.slack.circuit.codegen.annotations.CircuitInject(OtherScreen::class, AppScope::class)
-class OtherScreenPresenter(private val injectedString: String) : Presenter<OtherScreen.OtherScreenState> {
+class OtherScreenPresenter : Presenter<OtherScreen.OtherScreenState> {
     @Composable
     override fun present(): OtherScreen.OtherScreenState {
         return OtherScreen.OtherScreenState
