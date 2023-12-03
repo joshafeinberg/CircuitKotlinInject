@@ -464,7 +464,15 @@ private class CircuitSymbolProcessor(
                     } else {
                         if (codegenMode == CodegenMode.KOTLIN_INJECT) {
                             cd.primaryConstructor?.parameters?.forEach { parameter ->
-                                constructorParams.add(ParameterSpec.builder(parameter.name!!.asString(), parameter.type.toTypeName()).build())
+                                val resolvedType = parameter.type.resolve()
+                                if (!resolvedType.isInstanceOf(symbols.screen) && !resolvedType.isInstanceOf(symbols.navigator)) {
+                                    constructorParams.add(
+                                        ParameterSpec.builder(
+                                            parameter.name!!.asString(),
+                                            resolvedType.toTypeName()
+                                        ).build()
+                                    )
+                                }
                             }
                         }
                         // Simple constructor call, no injection.
@@ -631,7 +639,7 @@ private fun KSFunctionDeclaration.assistedParameters(
         }
     }
         .toList()
-        .map { CodeBlock.of("${it.name} = ${it.factoryName}") }
+        .map { CodeBlock.of("${it.name} = ${it.factoryName} as ${it.type}") }
         .joinToCode(",·")
 }
 

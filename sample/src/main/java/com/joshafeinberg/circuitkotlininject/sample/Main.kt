@@ -58,7 +58,10 @@ data object MyScreen : Screen {
 }
 
 @com.slack.circuit.codegen.annotations.CircuitInject(MyScreen::class, AppScope::class)
-class MyScreenPresenter(private val injectedString: String) : Presenter<MyScreen.MyScreenState> {
+class MyScreenPresenter(
+    private val injectedString: String,
+    private val screen: MyScreen,
+) : Presenter<MyScreen.MyScreenState> {
     @Composable
     override fun present(): MyScreen.MyScreenState {
         return MyScreen.MyScreenState(injectedString)
