@@ -22,7 +22,7 @@ ksp-processor = { module = "com.google.devtools.ksp:symbol-processing-api", vers
 [plugins]
 android-application = { id = "com.android.application", version.ref = "plugin-android-gradle" }
 android-library = { id = "com.android.library", version.ref = "plugin-android-gradle" }
-jetbrains-compose = { id = "org.jetbrains.compose", version = "1.5.11" }
+jetbrains-compose = { id = "org.jetbrains.compose", version = "1.6.1" }
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "plugin-kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "plugin-kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "plugin-ksp" }
