@@ -1,13 +1,13 @@
 [versions]
 app-cash-sqldelight = "2.0.0"
-circuit = "0.17.0"
+circuit = "1.0.0-SNAPSHOT"
 io-ktor = "2.3.6"
-kotlinInject = "0.6.3"
+kotlinInject = "0.7.0-SNAPSHOT"
 kotlinpoet = "1.15.2"
 
 plugin-android-gradle = "8.1.4"
-plugin-kotlin = "1.9.21"
-plugin-ksp = "1.9.21-1.0.15"
+plugin-kotlin = "1.9.23"
+plugin-ksp = "1.9.23-1.0.20"
 plugin-ktlint = "11.3.2"
 plugin-mavenpublish = "0.21.0"
 
