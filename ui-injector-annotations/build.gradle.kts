@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
+
 plugins {
     kotlin("multiplatform")
     alias(libs.plugins.mavenpublish)
@@ -8,6 +10,10 @@ kotlin {
         jvmToolchain(17)
     }
     js(IR) {
+        browser()
+    }
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
         browser()
     }
     sourceSets {
